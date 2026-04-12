@@ -1,0 +1,27 @@
+# Local vector database — regenerate with: python ingest.py
+chroma_db/
+
+# Environment variables — copy .env.example and fill in your values
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Claude files
+chat_summary.md
