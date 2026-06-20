@@ -1,5 +1,6 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
+from langsmith import traceable
 
 COLLECTION_NAME = "music_knowledge"
 
@@ -11,6 +12,7 @@ class Retriever:
         self.client = chromadb.PersistentClient(path="./chroma_db")
         self.collection = self.client.get_collection(COLLECTION_NAME)
 
+    @traceable(run_type="retriever")
     def retrieve(self, query: str) -> list[dict]:
         """Embed the query and return top-k most similar chunks."""
         query_embedding = self.embedder.encode(query).tolist()

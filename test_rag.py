@@ -42,7 +42,12 @@ def test_generation(retriever: Retriever):
     print("\n── Generation tests ────────────────────────")
     for tc in TEST_CASES:
         history = []
-        answer, chunks = ask(tc["query"], retriever, history)
+        answer, chunks = ask(
+            tc["query"],
+            retriever,
+            history,
+            langsmith_extra={"tags": ["eval"], "metadata": {"test_case": tc["query"]}},
+        )
         answer_lower = answer.lower()
 
         grounding_ok = len(chunks) > 0

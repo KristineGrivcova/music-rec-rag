@@ -3,3 +3,5 @@ ollama
 sentence-transformers
 pypdf2
 rich
+langsmith
+python-dotenv
