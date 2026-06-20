@@ -1,4 +1,9 @@
+from dotenv import load_dotenv
+
+load_dotenv()  # load LangSmith env vars (LANGSMITH_TRACING/API_KEY/PROJECT) before tracing
+
 import ollama
+from langsmith import traceable, get_current_run_tree
 from retriever import Retriever
 from rich.console import Console
 from rich.markdown import Markdown
@@ -19,6 +24,23 @@ When answering, you must:
 If asked for a recommendation, provide 1-3 albums with a brief explanation for each."""
 
 
+@traceable(run_type="llm", metadata={"ls_provider": "ollama", "ls_model_name": MODEL})
+def generate(messages: list[dict]) -> str:
+    """Call the local LLM and surface token usage to LangSmith."""
+    response = ollama.chat(model=MODEL, messages=messages)
+
+    # Attach ollama's token counts so LangSmith's usage/cost panels populate.
+    run = get_current_run_tree()
+    if run is not None:
+        run.metadata["usage_metadata"] = {
+            "input_tokens": response.get("prompt_eval_count", 0),
+            "output_tokens": response.get("eval_count", 0),
+        }
+
+    return response["message"]["content"]
+
+
+@traceable(run_type="prompt")
 def build_context(chunks: list[dict]) -> str:
     """Format retrieved chunks into a context block for the prompt."""
     if not chunks:
@@ -31,6 +53,7 @@ def build_context(chunks: list[dict]) -> str:
     return "\n".join(lines)
 
 
+@traceable(run_type="chain", metadata={"model": MODEL})
 def ask(query: str, retriever: Retriever, history: list[dict]) -> tuple[str, list[dict]]:
     """Single RAG turn: retrieve → build prompt → generate."""
     chunks = retriever.retrieve(query)
@@ -47,12 +70,9 @@ Answer based on the context above."""
 
     history.append({"role": "user", "content": user_message})
 
-    response = ollama.chat(
-        model=MODEL,
-        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + history,
+    answer = generate(
+        [{"role": "system", "content": SYSTEM_PROMPT}] + history,
     )
-
-    answer = response["message"]["content"]
 
     # Store the clean query (not the context-injected version) for history
     history[-1] = {"role": "user", "content": query}
