@@ -1,5 +1,7 @@
 # Music Recommendation RAG
 
+[![Traced with LangSmith](https://img.shields.io/badge/Traced%20with-LangSmith-1C3C3C?logo=langchain&logoColor=white)](https://eu.smith.langchain.com/o/20874cee-80e0-45fd-af06-1243659748b3/projects/p/21972d36-a17d-4b1a-997a-944631da47fd)
+
 A local retrieval-augmented generation (RAG) system that answers natural language questions about music and recommends albums from a curated knowledge base. Runs entirely on your machine — no API keys or internet connection required after setup.
 
 ## How it works
